@@ -39,7 +39,7 @@ class EmbedPdf
         $reports->getRecords();
         $reportCollection = LazyCollection::make(static fn () => yield from $reports);
 
-        $reportCollection->take(500)->each(function ($report) {
+        $reportCollection->take(5000)->each(function ($report) {
             $json = Http::get('https://www.everycrsreport.com/'. $report['url'])->json();
             $url = $json['versions'][0]['formats'][0]['filename'];
             $hash = $json['versions'][0]['formats'][0]['sha1'];
