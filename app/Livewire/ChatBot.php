@@ -2,19 +2,18 @@
 
 namespace App\Livewire;
 
-use App\Models\Conversation;
-use App\Models\Document;
-use App\Models\Message;
-use App\Services\GeneratorOpenAIService;
 use Arr;
-use Illuminate\Support\Str;
 use Livewire\Component;
+use App\Models\Message;
+use App\Models\Document;
+use Illuminate\Support\Str;
+use App\Models\Conversation;
 use Probots\Pinecone\Client as Pinecone;
+use App\Services\GeneratorOpenAIService;
 
 class ChatBot extends Component
 {
     protected $conversation;
-    protected $persisteddMessages = [];
     protected Document $currentDocument;
     protected bool $newSubject = false;
 
@@ -27,12 +26,11 @@ class ChatBot extends Component
     public function boot(GeneratorOpenAIService $openAIService)
     {
         $this->openAiService = $openAIService;
-        // check to see if we are continuing a previous session
+
         if (session()->exists('crschat')) {
             $sessionId = session()->get('crschat');
         } else {
-            $sessionId = \Str::random(10);
-            session()->put('crschat', $sessionId);
+            $sessionId = $this->_startNewSession();
         }
 
         $this->conversation = Conversation::firstOrCreate([
@@ -67,7 +65,7 @@ class ChatBot extends Component
         $this->dispatch('scroll-to-bottom');
     }
 
-    public function submitPrompt()
+    public function submitPrompt(): void
     {
         if (Str::contains($this->prompt, [
             'new search',
@@ -79,6 +77,7 @@ class ChatBot extends Component
                 'role' => 'bot',
                 'content' => 'Ok. What can I help you find next?'
             ];
+            $this->documents = [];
             $this->dispatch('scroll-to-bottom');
             return;
         }
@@ -98,9 +97,8 @@ class ChatBot extends Component
         $this->js('$wire.ask()');
     }
 
-    public function ask()
+    public function ask(): void
     {
-        // if this is a new conversation let's hit pinecone again for relevant docs
         if ($this->newSubject) {
             $question = $this->openAiService->embedData([$this->question]);
 
@@ -108,7 +106,8 @@ class ChatBot extends Component
 
             $currentDocs = $pinecone->data()
                 ->vectors()
-                ->query(vector: $question[0]->embedding, namespace: 'crsbot', topK: 10)->json();
+                ->query(vector: $question[0]->embedding, namespace: 'crsbot', topK: 10)
+                ->json();
 
             // let's reduce down to just the unique document ID's
             $documentChunks = Arr::map($currentDocs['matches'], function (array $docChunk, string $key) {
@@ -157,7 +156,7 @@ class ChatBot extends Component
         $this->dispatch('scroll-to-bottom');
     }
 
-    public function selectDocument($id)
+    public function selectDocument($id): void
     {
         $document = Document::find($id);
 
@@ -184,14 +183,14 @@ class ChatBot extends Component
         $this->dispatch('scroll-to-bottom');
     }
 
-    private function _storeConversationChunk($message, $role) {
+    private function _storeConversationChunk($message, $role): void {
         $this->conversation->messages()->create([
             'content' => $message,
             'role' => $role
         ]);
     }
 
-    private function _storeDocument($documentId) {
+    private function _storeDocument($documentId): void {
         $this->conversation->documents()->create([
             'conversation_id' => $this->conversation->id,
             'document_id' => $documentId,
@@ -207,12 +206,14 @@ class ChatBot extends Component
         })->toJson();
     }
 
-    private function _startNewSession()
+    private function _startNewSession(): string
     {
         session()->forget('crschat');
         session()->save();
 
         $sessionId = \Str::random(10);
         session()->put('crschat', $sessionId);
+
+        return $sessionId;
     }
 }

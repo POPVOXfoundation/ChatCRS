@@ -42,6 +42,18 @@ class EmbedPdf
         $reportCollection->take(500)->each(function ($report) {
             $json = Http::get('https://www.everycrsreport.com/'. $report['url'])->json();
             $url = $json['versions'][0]['formats'][0]['filename'];
+            $hash = $json['versions'][0]['formats'][0]['sha1'];
+
+            // check to see if we already have this version of the doc
+            // for now if this is a new version remove the old and replace it
+            if ($existingDoc = Document::where('report_id', $report['number'])->first()) {
+                if ($existingDoc->hash !== $hash) {
+                    $existingDoc->delete();
+                } else {
+                    return;
+                }
+            }
+
             $pdf = Http::get('https://www.everycrsreport.com/'. $url);
 
             if ($pdf->forbidden()) {
@@ -77,6 +89,7 @@ class EmbedPdf
                         $this->_storeDocumentChunkToSql([
                             'report_id' => $report['number'],
                             'chunk_id' => ($chunkIndex * 20 + $index),
+                            'hash' => $json['versions'][0]['formats'][0]['sha1'],
                             'title' => $json['versions'][0]['title'],
                             'url' => 'https://www.everycrsreport.com/' . $json['versions'][0]['formats'][0]['filename'],
                             'text' => $sanitizedPages[$chunkIndex * 20 + $index]['text'],
@@ -169,6 +182,7 @@ class EmbedPdf
             $currentDoc = Document::create(Arr::only($chunkedDoc, [
                 'report_id',
                 'title',
+                'hash',
                 'url'
             ]));
         }

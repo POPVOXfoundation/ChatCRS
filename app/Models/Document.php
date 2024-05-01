@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Document extends Model
 {
@@ -12,10 +13,18 @@ class Document extends Model
     protected $fillable = [
         'report_id',
         'title',
+        'hash',
         'url'
     ];
 
-    public function chunks()
+    protected static function booted(): void
+    {
+        static::deleting(function (Document $document) {
+            $document->chunks()->delete();
+        });
+    }
+
+    public function chunks(): HasMany
     {
         return $this->hasMany(DocumentChunk::class);
     }
