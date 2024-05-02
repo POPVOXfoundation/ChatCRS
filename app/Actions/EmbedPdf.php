@@ -42,6 +42,10 @@ class EmbedPdf
         $reportCollection->take(5000)->each(function ($report) use ($command) {
             $command->info("Trying report: {$report['number']}.");
             $json = Http::retry([100, 200])->get('https://www.everycrsreport.com/'. $report['url'])->json();
+
+            // let's set the stage for the current working PDF
+            Storage::disk('local')->delete('current.pdf');
+
             $this->_storeTempPdf($json['versions'][0], $report['number'], $command);
 
             // if no current pdf exists it's because we already have this - move on
@@ -102,7 +106,6 @@ class EmbedPdf
                 );
             });
 
-            Storage::disk('local')->delete('current.pdf');
             $command->newline(2);
         });
     }
