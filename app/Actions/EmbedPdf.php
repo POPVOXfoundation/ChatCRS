@@ -29,7 +29,7 @@ class EmbedPdf
 
     public $commandSignature = 'embed:pdf';
 
-    public function handle()
+    public function handle($command)
     {
         $csvContents = Http::get('https://www.everycrsreport.com/reports.csv')->body();
         Storage::disk("local")->put('reports.csv', $csvContents);
@@ -39,7 +39,8 @@ class EmbedPdf
         $reports->getRecords();
         $reportCollection = LazyCollection::make(static fn () => yield from $reports);
 
-        $reportCollection->take(5000)->each(function ($report) {
+        $reportCollection->take(5000)->each(function ($report) use ($command) {
+            $command->info("Trying report: {$report['number']}.");
             $json = Http::retry([100, 200])->get('https://www.everycrsreport.com/'. $report['url'])->json();
             $url = $json['versions'][0]['formats'][0]['filename'];
             $hash = $json['versions'][0]['formats'][0]['sha1'];
@@ -50,6 +51,8 @@ class EmbedPdf
                 if ($existingDoc->hash !== $hash) {
                     $existingDoc->delete();
                 } else {
+                    $command->error("Document {$report['number']} already exists.");
+                    $command->newline(2);
                     return;
                 }
             }
@@ -105,12 +108,13 @@ class EmbedPdf
             });
 
             Storage::disk('local')->delete('current.pdf');
+            $command->newline(2);
         });
     }
 
     public function asCommand(Command $command): void
     {
-        $this->handle();
+        $this->handle($command);
     }
 
     private function removeFootnotesSection($text): string
