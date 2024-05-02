@@ -42,28 +42,23 @@ class EmbedPdf
         $reportCollection->take(5000)->each(function ($report) use ($command) {
             $command->info("Trying report: {$report['number']}.");
             $json = Http::retry([100, 200])->get('https://www.everycrsreport.com/'. $report['url'])->json();
-            $url = $json['versions'][0]['formats'][0]['filename'];
-            $hash = $json['versions'][0]['formats'][0]['sha1'];
+            $this->_storeTempPdf($json['versions'][0], $report['number'], $command);
 
-            // check to see if we already have this version of the doc
-            // for now if this is a new version remove the old and replace it
-            if ($existingDoc = Document::where('report_id', $report['number'])->first()) {
-                if ($existingDoc->hash !== $hash) {
-                    $existingDoc->delete();
-                } else {
-                    $command->error("Document {$report['number']} already exists.");
-                    $command->newline(2);
+            // if no current pdf exists it's because we already have this - move on
+            if (!Storage::exists('current.pdf')) {
+                return;
+            }
+
+            if (!Storage::disk('local')->size('current.pdf') > 1) {
+                // We run into some files where for whatever reason the PDF is empty
+                // Let's try to get the previous available version to use if we don't already have it
+                if (isset($json['versions'][1])) {
+                    $this->_storeTempPdf($json['versions'][1], $report['number'], $command);
+                }
+                if (!Storage::disk('local')->size('current.pdf') > 1) {
                     return;
                 }
             }
-
-            $pdf = Http::get('https://www.everycrsreport.com/'. $url);
-
-            if ($pdf->forbidden()) {
-                dd('can not get to file for id of ' . $json['id']);
-            }
-
-            Storage::disk('local')->put('current.pdf', $pdf->body());
 
             $fileText = Pdf::getText(
                 storage_path('app/current.pdf'),
@@ -195,5 +190,31 @@ class EmbedPdf
             'text',
             'page_number'
         ]));
+    }
+
+    private function _storeTempPdf(array $version, string $reportNumber, Command $command): void
+    {
+        $url = $version['formats'][0]['filename'];
+        $hash = $version['formats'][0]['sha1'];
+
+        // check to see if we already have this version of the doc
+        // for now if this is a new version remove the old and replace it
+        if ($existingDoc = Document::where('report_id', $reportNumber)->first()) {
+            if ($existingDoc->hash !== $hash) {
+                $existingDoc->delete();
+            } else {
+                $command->error("Document {$reportNumber} already exists.");
+                $command->newline(2);
+                return;
+            }
+        }
+
+        $pdf = Http::get('https://www.everycrsreport.com/'. $url);
+
+        if ($pdf->forbidden()) {
+            dd('can not get to file for id of ' . $reportNumber);
+        }
+
+        Storage::disk('local')->put('current.pdf', $pdf->body());
     }
 }
