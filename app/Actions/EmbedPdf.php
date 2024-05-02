@@ -57,9 +57,11 @@ class EmbedPdf
                 // We run into some files where for whatever reason the PDF is empty
                 // Let's try to get the previous available version to use if we don't already have it
                 if (isset($json['versions'][1])) {
+                    $command->info("Trying second version for: {$report['number']}.");
                     $this->_storeTempPdf($json['versions'][1], $report['number'], $command);
                 }
                 if (!Storage::disk('local')->size('current.pdf') > 1) {
+                    $command->error("No report ready for  {$report['number']}.");
                     return;
                 }
             }
