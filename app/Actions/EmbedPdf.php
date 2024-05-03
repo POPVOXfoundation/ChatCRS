@@ -41,7 +41,7 @@ class EmbedPdf
 
         $reportCollection->take(10000)->each(function ($report) use ($command) {
             // for testing
-//            if ($report['number'] !== 'R45763') {
+//            if ($report['number'] !== 'IN11397') {
 //                return;
 //            }
             //////////////
@@ -207,9 +207,11 @@ class EmbedPdf
     {
         // find the format that contains the PDF file
         $formats = $version['formats'];
-        $pdfInfo = Arr::first($formats, function ($format) {
+        if (!$pdfInfo = Arr::first($formats, function ($format) {
             return $format['format'] === 'PDF';
-        });
+        })) {
+            return;
+        }
 
         $url = $pdfInfo['filename'];
         $hash = $pdfInfo['sha1'] ?? '';
