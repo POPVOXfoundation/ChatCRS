@@ -41,9 +41,9 @@ class EmbedPdf
 
         $reportCollection->take(5000)->each(function ($report) use ($command) {
             // for testing
-//            if ($report['number'] !== 'RL30110') {
-//                return;
-//            }
+            if ($report['number'] !== 'RL30110') {
+                return;
+            }
             //////////////
             $command->info("Trying report: {$report['number']}.");
             $json = Http::retry([100, 200])->get('https://www.everycrsreport.com/'. $report['url'])->json();
@@ -85,7 +85,7 @@ class EmbedPdf
                 return $this->processText($page, $report['title']);
             })->filter(function ($page) {
                 return Str::length($page['text']) > 85;
-            })->toArray();
+            })->values()->all();
 
             $embeddings = $this->openAiService->embedData(Arr::pluck($sanitizedPages, 'text'));
 
