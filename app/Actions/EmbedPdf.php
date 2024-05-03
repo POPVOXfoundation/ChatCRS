@@ -41,7 +41,7 @@ class EmbedPdf
 
         $reportCollection->take(10000)->each(function ($report) use ($command) {
             // for testing
-//            if ($report['number'] !== 'R46243') {
+//            if ($report['number'] !== 'R45763') {
 //                return;
 //            }
             //////////////
@@ -205,8 +205,14 @@ class EmbedPdf
 
     private function _storeTempPdf(array $version, string $reportNumber, Command $command): void
     {
-        $url = $version['formats'][0]['filename'];
-        $hash = $version['formats'][0]['sha1'] ?? '';
+        // find the format that contains the PDF file
+        $formats = $version['formats'];
+        $pdfInfo = Arr::first($formats, function ($format) {
+            return $format['format'] === 'PDF';
+        });
+
+        $url = $pdfInfo['filename'];
+        $hash = $pdfInfo['sha1'] ?? '';
 
         // check to see if we already have this version of the doc
         // for now if this is a new version remove the old and replace it
@@ -223,7 +229,7 @@ class EmbedPdf
         $pdf = Http::get('https://www.everycrsreport.com/'. $url);
 
         if ($pdf->forbidden()) {
-            dd('can not get to file for id of ' . $reportNumber);
+            return;
         }
 
         Storage::disk('local')->put('current.pdf', $pdf->body());
