@@ -41,9 +41,9 @@ class EmbedPdf
 
         $reportCollection->take(5000)->each(function ($report) use ($command) {
             // for testing
-//            if ($report['number'] !== 'RL30110') {
-//                return;
-//            }
+            if ($report['number'] !== 'R46892') {
+                return;
+            }
             //////////////
             $command->info("Trying report: {$report['number']}.");
             $json = Http::retry([100, 200])->get('https://www.everycrsreport.com/'. $report['url'])->json();
@@ -80,7 +80,6 @@ class EmbedPdf
                 ->split("/\f/")
                 ->toArray();
 
-//        dd($content[3]);
             $sanitizedPages = collect($pageContent)->map(function ($page) use ($report) {
                 return $this->processText($page, $report['title']);
             })->filter(function ($page) {
@@ -100,7 +99,7 @@ class EmbedPdf
                         $this->_storeDocumentChunkToSql([
                             'report_id' => $report['number'],
                             'chunk_id' => ($chunkIndex * 20 + $index),
-                            'hash' => $json['versions'][0]['formats'][0]['sha1'],
+                            'hash' => $json['versions'][0]['formats'][0]['sha1'] ?? '',
                             'title' => $json['versions'][0]['title'],
                             'url' => 'https://www.everycrsreport.com/' . $json['versions'][0]['formats'][0]['filename'],
                             'text' => $sanitizedPages[$chunkIndex * 20 + $index]['text'],
@@ -207,7 +206,7 @@ class EmbedPdf
     private function _storeTempPdf(array $version, string $reportNumber, Command $command): void
     {
         $url = $version['formats'][0]['filename'];
-        $hash = $version['formats'][0]['sha1'];
+        $hash = $version['formats'][0]['sha1'] ?? '';
 
         // check to see if we already have this version of the doc
         // for now if this is a new version remove the old and replace it
