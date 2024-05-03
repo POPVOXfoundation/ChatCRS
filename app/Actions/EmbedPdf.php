@@ -41,7 +41,7 @@ class EmbedPdf
 
         $reportCollection->take(5000)->each(function ($report) use ($command) {
             // for testing
-//            if ($report['number'] !== 'R46892') {
+//            if ($report['number'] !== 'R46300') {
 //                return;
 //            }
             //////////////
@@ -65,7 +65,7 @@ class EmbedPdf
                     $command->info("Trying second version for: {$report['number']}.");
                     $this->_storeTempPdf($json['versions'][1], $report['number'], $command);
                 }
-                if (Storage::disk('local')->size('current.pdf') == 0) {
+                if (Storage::disk('local')->size('current.pdf') == 0 || Storage::mimeType('current.pdf') !== 'application/pdf') {
                     $command->error("No report ready for  {$report['number']}.");
                     return;
                 }
