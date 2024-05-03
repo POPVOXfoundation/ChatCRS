@@ -41,7 +41,7 @@ class EmbedPdf
 
         $reportCollection->take(10000)->each(function ($report) use ($command) {
             // for testing
-//            if ($report['number'] !== 'R46300') {
+//            if ($report['number'] !== 'R46243') {
 //                return;
 //            }
             //////////////
@@ -58,7 +58,7 @@ class EmbedPdf
                 return;
             }
 
-            if (Storage::disk('local')->size('current.pdf') == 0) {
+            if (Storage::disk('local')->size('current.pdf') == 0 || Storage::mimeType('current.pdf') !== 'application/pdf') {
                 // We run into some files where for whatever reason the PDF is empty
                 // Let's try to get the previous available version to use if we don't already have it
                 if (isset($json['versions'][1])) {
