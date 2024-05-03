@@ -41,9 +41,9 @@ class EmbedPdf
 
         $reportCollection->take(5000)->each(function ($report) use ($command) {
             // for testing
-            if ($report['number'] !== 'R46892') {
-                return;
-            }
+//            if ($report['number'] !== 'R46892') {
+//                return;
+//            }
             //////////////
             $command->info("Trying report: {$report['number']}.");
             $json = Http::retry([100, 200])->get('https://www.everycrsreport.com/'. $report['url'])->json();
