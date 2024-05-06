@@ -45,9 +45,9 @@ class EmbedPdf
             })
             ->each(function ($report) use ($command) {
             // for testing
-//            if ($report['number'] !== 'IN11397') {
-//                return;
-//            }
+            if ($report['number'] !== 'R42926') {
+                return;
+            }
             //////////////
             $command->info("Trying report: {$report['number']}.");
             $json = Http::retry([100, 200])->get('https://www.everycrsreport.com/'. $report['url'])->json();
@@ -89,6 +89,11 @@ class EmbedPdf
             })->filter(function ($page) {
                 return Str::length($page['text']) > 85;
             })->values()->all();
+
+            // we rarely have no pages that were discernible so let's just stop here
+            if (empty($sanitizedPages)) {
+                return;
+            }
 
             $embeddings = $this->openAiService->embedData(Arr::pluck($sanitizedPages, 'text'));
 
