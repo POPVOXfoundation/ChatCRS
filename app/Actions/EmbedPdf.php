@@ -39,7 +39,11 @@ class EmbedPdf
         $reports->getRecords();
         $reportCollection = LazyCollection::make(static fn () => yield from $reports);
 
-        $reportCollection->take(10000)->each(function ($report) use ($command) {
+        $reportCollection->skip(10007)
+            ->takeUntil(function ($report) {
+                return $report['number'] === 'RS22950';
+            })
+            ->each(function ($report) use ($command) {
             // for testing
 //            if ($report['number'] !== 'IN11397') {
 //                return;
