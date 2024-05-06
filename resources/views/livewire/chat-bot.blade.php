@@ -17,7 +17,7 @@
                 <!-- Chat messages -->
                 <div class="p-2 my-2 bg-gray-100 rounded">
                     <p>Hi there! I am your CRS data bot.</p>
-                    <p>I can help you find information by searching over 20,000 reports. What can I help you find?</p>
+                    <p>I can help you find information by searching thousands of reports. What can I help you find?</p>
                 </div>
                 @foreach($messages as $message)
                     @if ($message['role'] === 'user')
