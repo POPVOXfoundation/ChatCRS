@@ -2,7 +2,7 @@
     <div class="w-1/3 p-4">
         <!-- Document list section -->
         <div class="bg-white rounded-lg shadow-lg p-6 h-full">
-            <h2 class="font-semibold text-lg mb-3">Relevant CSR Reports</h2>
+            <h2 class="font-semibold text-lg mb-3">Relevant CRS Reports</h2>
             <ul>
                 @foreach($documents as $document)
                 <li class="mb-2"><a href="#" wire:click.prevent="selectDocument({{ $document['doc_id'] }})" class="text-blue-600 hover:text-blue-800">{{ $document['doc_title'] }}</a></li>
