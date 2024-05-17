@@ -1,17 +1,22 @@
-<div class="flex flex-row w-full h-full">
-    <div class="w-1/3 p-4">
+<div class="flex flex-row w-full h-full pt-16">
+    <div class="w-1/3 p-4 h-full overflow-y-auto">
         <!-- Document list section -->
         <div class="bg-white rounded-lg shadow-lg p-6 h-full">
             <h2 class="font-semibold text-lg mb-3">Relevant CRS Reports</h2>
             <ul>
                 @foreach($documents as $document)
-                <li class="mb-2"><a href="#" wire:click.prevent="selectDocument({{ $document['doc_id'] }})" class="text-blue-600 hover:text-blue-800">{{ $document['doc_title'] }}</a></li>
+                <li wire:key="{{ $document['doc_id'] }}" class="mb-3">
+                    <a href="#" wire:click.prevent="selectDocument({{ $document['doc_id'] }})"
+                       class="{{ $document['doc_id'] === $activeDocumentId ? 'text-red-700 font-semibold' : 'text-gray-500 hover:text-blue-600' }}">
+                        {{ $document['doc_title'] }}
+                    </a>
+                </li>
                  @endforeach
             </ul>
         </div>
     </div>
     <!-- Another section on the right -->
-    <div class="w-1/2 p-4 flex flex-col">
+    <div class="w-1/2 p-4 flex flex-col h-full overflow-y-auto">
         <div class="flex flex-col h-full bg-white rounded-lg shadow-lg">
             <div id="message-container" class="overflow-y-auto flex-grow p-6">
                 <!-- Chat messages -->
@@ -50,6 +55,16 @@
                     </button>
                 </form>
             </div>
+        </div>
+    </div>
+    <!-- Right column: Additional content -->
+    <div class="w-1/4 p-4">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <!-- Additional content goes here -->
+            <h3 class="font-semibold mb-3.5">Additional Information</h3>
+            <p class="text-sm text-slate-500 mb-3"><span class="italic font-semibold text-slate-600">Disclaimer: </span>This bot is currently in an experimental phase. Some search features may be limited on certain reports.</p>
+            <hr>
+            <p class="text-sm text-slate-500 mb-3 mt-3"><span class="italic font-semibold text-slate-600">Important: </span>To start a new search on a different topc - simply type "new search" or "new subject" into the chat box.
         </div>
     </div>
 </div>

@@ -8,9 +8,11 @@ use App\Models\Message;
 use App\Models\Document;
 use Illuminate\Support\Str;
 use App\Models\Conversation;
+use Livewire\Attributes\Title;
 use Probots\Pinecone\Client as Pinecone;
 use App\Services\GeneratorOpenAIService;
 
+#[Title('CRSbot')]
 class ChatBot extends Component
 {
     protected $conversation;
@@ -21,9 +23,10 @@ class ChatBot extends Component
     public $prompt = '';
     public $question = '';
     public $documents = [];
+    public $activeDocumentId;
     private GeneratorOpenAIService $openAiService;
 
-    public function boot(GeneratorOpenAIService $openAIService)
+    public function boot(GeneratorOpenAIService $openAIService): void
     {
         $this->openAiService = $openAIService;
 
@@ -46,6 +49,7 @@ class ChatBot extends Component
                 $currentDocument = Document::find($document->document_id);
                 if ($document->active) {
                     $this->currentDocument = $currentDocument;
+                    $this->activeDocumentId = $currentDocument->id;
                 }
                 return [
                     'doc_id' => $currentDocument->id,
@@ -73,6 +77,7 @@ class ChatBot extends Component
         ])) {
             $this->_startNewSession();
             $this->prompt = '';
+            $this->reset('messages');
             $this->messages[] = [
                 'role' => 'bot',
                 'content' => 'Ok. What can I help you find next?'
@@ -159,6 +164,7 @@ class ChatBot extends Component
     public function selectDocument($id): void
     {
         $document = Document::find($id);
+        $this->activeDocumentId = $document->id;
 
         $messageText = 'Ok. How can I help you with this report?';
 
@@ -174,6 +180,14 @@ class ChatBot extends Component
             'role' => 'assistant',
             'content' => $messageText
         ];
+
+        // remove the active state for any previously used doc in this conversation
+        $activeDoc = $this->conversation->documents()->where('active', true)->first();
+
+        if ($activeDoc) {
+            $activeDoc->active = false;
+            $activeDoc->save();
+        }
 
         $conversationDoc = $this->conversation->documents()->where('document_id', $document->id)->first();
 

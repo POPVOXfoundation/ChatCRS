@@ -33,16 +33,20 @@ class GeneratorOpenAIService
             ];
         }
 
-        $response = $this->client->chat()->create([
-            'model' => 'gpt-4-turbo',
-            'messages' => $systemPrompt,
-            'response_format' => ['type' => 'json_object'],
-            'temperature' => 0.7,
-            'max_tokens' => 4096,
-            'top_p' => 1,
-            'frequency_penalty' => 0,
-            'presence_penalty' => 0
-        ]);
+        try {
+            $response = $this->client->chat()->create([
+                'model' => 'gpt-4o',
+                'messages' => $systemPrompt,
+                'response_format' => ['type' => 'json_object'],
+                'temperature' => 0.7,
+                'max_tokens' => 4096,
+                'top_p' => 1,
+                'frequency_penalty' => 0,
+                'presence_penalty' => 0
+            ]);
+        } catch (\Exception $e) {
+            return json_encode(['answer' => 'This document is currently not searchable. Keep in mind as a beta bot - I am a work in progress. Please feel free to select a different document to interact with.']);
+        }
 
         return $response['choices'][0]['message']['content'];
     }
