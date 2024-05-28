@@ -42,6 +42,7 @@ return [
     'pinecone' => [
         'api_key' => env('PINECONE_API_KEY', ''),
         'environment' => env('PINECONE_ENVIRONMENT', ''),
+        'index_host' => env('PINECONE_INDEX_HOST')
     ]
 
 ];

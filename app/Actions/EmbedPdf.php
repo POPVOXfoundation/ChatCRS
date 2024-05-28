@@ -109,6 +109,7 @@ class EmbedPdf
                             'report_id' => $report['number'],
                             'chunk_id' => ($chunkIndex * 20 + $index),
                             'hash' => $json['versions'][0]['formats'][0]['sha1'] ?? '',
+                            'document_date' => $json['versions'][0]['date'],
                             'title' => $json['versions'][0]['title'],
                             'url' => 'https://www.everycrsreport.com/' . $json['versions'][0]['formats'][0]['filename'],
                             'text' => $sanitizedPages[$chunkIndex * 20 + $index]['text'],
@@ -117,6 +118,9 @@ class EmbedPdf
                         return [
                             'id' => $report['number'] . '_' . ($chunkIndex * 20 + $index),
                             'values' => $embedding,
+                            'metadata' => [
+                                'report_id' => $report['number'],
+                            ],
                         ];
                     })->toArray(),
                     namespace: 'crsbot'
@@ -202,6 +206,7 @@ class EmbedPdf
                 'report_id',
                 'title',
                 'hash',
+                'document_date',
                 'url'
             ]));
         }

@@ -14,7 +14,12 @@ class Document extends Model
         'report_id',
         'title',
         'hash',
+        'document_date',
         'url'
+    ];
+
+    protected $casts = [
+        'document_date' => 'datetime',
     ];
 
     protected static function booted(): void

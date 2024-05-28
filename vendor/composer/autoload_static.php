@@ -652,6 +652,7 @@ class ComposerStaticInit968f73bcf5520ee401d641d0d79555ec
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
         'App\\Services\\GeneratorOpenAIService' => __DIR__ . '/../..' . '/app/Services/GeneratorOpenAIService.php',
+        'App\\Services\\PineconeSearch' => __DIR__ . '/../..' . '/app/Services/PineconeSearch.php',
         'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'Barryvdh\\LaravelIdeHelper\\Alias' => __DIR__ . '/..' . '/barryvdh/laravel-ide-helper/src/Alias.php',
         'Barryvdh\\LaravelIdeHelper\\Console\\EloquentCommand' => __DIR__ . '/..' . '/barryvdh/laravel-ide-helper/src/Console/EloquentCommand.php',
