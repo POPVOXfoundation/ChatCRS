@@ -25,7 +25,7 @@ class Conversation extends Model
         return $this->hasMany(ConversationDocument::class);
     }
 
-    public function chunks()
+    public function chunks(): HasMany
     {
         return $this->hasMany(ConversationChunk::class);
     }

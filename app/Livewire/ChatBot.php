@@ -38,18 +38,19 @@ class ChatBot extends Component
             $sessionId = $this->_startNewSession();
         }
 
-        $this->conversation = Conversation::firstOrCreate([
+        $this->conversation = Conversation::with([
+            'documents.document.chunks', // Eager load chunks to avoid N+1 problem
+            'messages'
+        ])->firstOrCreate([
             'session_id' => $sessionId
         ]);
 
-        // see if we have any current documents to use for this query
-        // if not - this is our first search on the subject
         if ($this->conversation->documents->isEmpty()) {
             $this->newSubject = true;
         } else {
-            $this->documents = $this->conversation->documents->map(function ($document, $key) {
-                $currentDocument = Document::find($document->document_id);
-                if ($document->active) {
+            $this->documents = $this->conversation->documents->map(function ($conversationDocument) {
+                $currentDocument = $conversationDocument->document;
+                if ($conversationDocument->active) {
                     $this->currentDocument = $currentDocument;
                     $this->activeDocumentId = $currentDocument->id;
                 }
@@ -63,7 +64,6 @@ class ChatBot extends Component
             });
         }
 
-        // map out all our current messages to an array
         $this->messages = $this->conversation->messages->map(function (Message $message) {
             return [
                 'content' => $message->content,
@@ -76,10 +76,7 @@ class ChatBot extends Component
 
     public function submitPrompt(): void
     {
-        if (Str::contains($this->prompt, [
-            'new search',
-            'new subject'
-        ])) {
+        if (Str::contains($this->prompt, ['new search', 'new subject'])) {
             $this->_startNewSession();
             $this->prompt = '';
             $this->reset('messages');
@@ -112,10 +109,7 @@ class ChatBot extends Component
         if ($this->newSubject) {
             $documentIds = $this->_getDocumentChunksFromVectors();
 
-            // now create the final array of ID's and document titles
-            // there is definitely a better way to streamline this -
-            // but for now we will just do it this clunky way.
-            $this->documents = Arr::map($documentIds, function ($value, $key) {
+            $this->documents = Arr::map($documentIds, function ($value) {
                 $document = Document::where('report_id', $value)->first();
                 $this->_storeDocument($document->id);
                 return [
@@ -138,9 +132,7 @@ class ChatBot extends Component
             ];
 
             $this->newSubject = false;
-
         } else {
-            // first let's query pinecone again now just for this document
             $chunkIds = $this->_getDocumentChunksFromVectors($this->currentDocument->report_id);
             $response = json_decode($this->openAiService->generateResponse($this->messages, $this->_generateChunkJson($chunkIds)));
 
@@ -154,6 +146,7 @@ class ChatBot extends Component
 
         $this->dispatch('scroll-to-bottom');
     }
+
 
     public function selectDocument($id): void
     {
@@ -175,7 +168,6 @@ class ChatBot extends Component
             'content' => $messageText
         ];
 
-        // remove the active state for any previously used doc in this conversation
         $activeDoc = $this->conversation->documents()->where('active', true)->first();
 
         if ($activeDoc) {
@@ -184,7 +176,6 @@ class ChatBot extends Component
         }
 
         $conversationDoc = $this->conversation->documents()->where('document_id', $document->id)->first();
-
         $conversationDoc->active = true;
         $conversationDoc->save();
 
@@ -201,7 +192,7 @@ class ChatBot extends Component
                 ->query(vector: $question[0]->embedding, namespace: 'crsbot', filter: ['report_id' => ['$eq' => $report_id]], topK: 10)
                 ->json();
 
-            return Arr::map($relevantChunks['matches'], function (array $docChunk, string $key) {
+            return Arr::map($relevantChunks['matches'], function (array $docChunk) {
                 return [
                     'chunk_id' => $docChunk['id']
                 ];
@@ -212,8 +203,7 @@ class ChatBot extends Component
                 ->query(vector: $question[0]->embedding, namespace: 'crsbot', topK: 10)
                 ->json();
 
-            // let's reduce down to just the unique document ID's
-            $documentChunks = Arr::map($relevantDocs['matches'], function (array $docChunk, string $key) {
+            $documentChunks = Arr::map($relevantDocs['matches'], function (array $docChunk) {
                 return [
                     'report_id' => Arr::first(explode('_', $docChunk['id']))
                 ];
@@ -223,21 +213,24 @@ class ChatBot extends Component
         }
     }
 
-    private function _storeConversationChunk($message, $role): void {
+    private function _storeConversationChunk($message, $role): void
+    {
         $this->conversation->messages()->create([
             'content' => $message,
             'role' => $role
         ]);
     }
 
-    private function _storeDocument($documentId): void {
+    private function _storeDocument($documentId): void
+    {
         $this->conversation->documents()->create([
             'conversation_id' => $this->conversation->id,
             'document_id' => $documentId,
         ]);
     }
 
-    private function _generateChunkJson($filterChunkIds = null) {
+    private function _generateChunkJson($filterChunkIds = null)
+    {
         $chunkIdList = $filterChunkIds ? array_column($filterChunkIds, 'chunk_id') : [];
 
         return $this->currentDocument->chunks->when(!empty($chunkIdList), function ($collection) use ($chunkIdList) {
@@ -251,7 +244,6 @@ class ChatBot extends Component
             ];
         })->toJson();
     }
-
 
     private function _startNewSession(): string
     {
