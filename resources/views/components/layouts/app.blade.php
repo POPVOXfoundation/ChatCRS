@@ -8,7 +8,7 @@
     </head>
     <body class="bg-gray-200 h-screen">
         <header class="bg-blue-500 text-white p-4 text-lg font-semibold shadow-lg w-full fixed top-0 left-0 z-10">
-            CRSbot (beta)
+            ChatCRS (beta)
         </header>
         {{ $slot }}
     </body>

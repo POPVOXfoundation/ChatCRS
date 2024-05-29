@@ -1,17 +1,22 @@
 <div class="flex flex-row w-full h-full pt-16">
     <div class="w-1/3 p-4 h-full overflow-y-auto">
         <!-- Document list section -->
-        <div class="bg-white rounded-lg shadow-lg p-6 h-full">
+        <div class="bg-white rounded-lg shadow-lg p-6 h-full overflow-y-auto">
             <h2 class="font-semibold text-lg mb-3">Relevant CRS Reports</h2>
-            <ul>
+            <ul class="space-y-4">
                 @foreach($documents as $document)
-                <li wire:key="{{ $document['doc_id'] }}" class="mb-3">
-                    <a href="#" wire:click.prevent="selectDocument({{ $document['doc_id'] }})"
-                       class="{{ $document['doc_id'] === $activeDocumentId ? 'text-red-700 font-semibold' : 'text-gray-500 hover:text-blue-600' }}">
-                        {{ $document['doc_title'] }}
-                    </a>
-                </li>
-                 @endforeach
+                    <li wire:key="{{ $document['doc_id'] }}" class="{{ $document['doc_id'] === $activeDocumentId ? 'bg-gray-200' : 'bg-gray-50' }} p-4 hover:bg-gray-100 transition-colors duration-200 rounded-lg">
+                        <a href="#"
+                           wire:click.prevent="selectDocument({{ $document['doc_id'] }})"
+                           class="{{ $document['doc_id'] === $activeDocumentId ? 'text-red-700 font-semibold' : 'text-gray-500 hover:text-blue-600' }}">
+                            {{ $document['doc_title'] }}
+                        </a>
+                        <div class="text-sm mt-2 flex justify-between items-center">
+                            <span class="text-gray-400">{{ $document['doc_date']->format('M d, Y') }} - {{ $document['pages'] }} pages</span>
+                            <a href="{{ $document['url'] }}" class="text-blue-500 hover:text-blue-700" target="_blank">View Report</a>
+                        </div>
+                    </li>
+                @endforeach
             </ul>
         </div>
     </div>

@@ -12,7 +12,7 @@ use Livewire\Attributes\Title;
 use Probots\Pinecone\Client as Pinecone;
 use App\Services\GeneratorOpenAIService;
 
-#[Title('CRSbot')]
+#[Title('ChatCRS')]
 class ChatBot extends Component
 {
     protected $conversation;
@@ -25,10 +25,12 @@ class ChatBot extends Component
     public $documents = [];
     public $activeDocumentId;
     private GeneratorOpenAIService $openAiService;
+    private Pinecone $pinecone;
 
     public function boot(GeneratorOpenAIService $openAIService): void
     {
         $this->openAiService = $openAIService;
+        $this->pinecone = new Pinecone(env('PINECONE_API_KEY'), env('PINECONE_INDEX_HOST'));
 
         if (session()->exists('crschat')) {
             $sessionId = session()->get('crschat');
@@ -53,7 +55,10 @@ class ChatBot extends Component
                 }
                 return [
                     'doc_id' => $currentDocument->id,
-                    'doc_title' => $currentDocument->title
+                    'doc_title' => $currentDocument->title,
+                    'url' => $currentDocument->url,
+                    'doc_date' => $currentDocument->document_date,
+                    'pages' => $currentDocument->chunks->count(),
                 ];
             });
         }
@@ -105,23 +110,7 @@ class ChatBot extends Component
     public function ask(): void
     {
         if ($this->newSubject) {
-            $question = $this->openAiService->embedData([$this->question]);
-
-            $pinecone = new Pinecone(env('PINECONE_API_KEY'), env('PINECONE_INDEX_HOST'));
-
-            $currentDocs = $pinecone->data()
-                ->vectors()
-                ->query(vector: $question[0]->embedding, namespace: 'crsbot', topK: 10)
-                ->json();
-
-            // let's reduce down to just the unique document ID's
-            $documentChunks = Arr::map($currentDocs['matches'], function (array $docChunk, string $key) {
-                return [
-                    'report_id' => Arr::first(explode('_', $docChunk['id']))
-                ];
-            });
-
-            $documentIds = array_unique_multidimensional($documentChunks);
+            $documentIds = $this->_getDocumentChunksFromVectors();
 
             // now create the final array of ID's and document titles
             // there is definitely a better way to streamline this -
@@ -132,11 +121,14 @@ class ChatBot extends Component
                 return [
                     'doc_id' => $document->id,
                     'report_id' => $value['report_id'],
-                    'doc_title' => $document->title
+                    'doc_title' => $document->title,
+                    'url' => $document->url,
+                    'doc_date' => $document->document_date,
+                    'pages' => $document->chunks->count(),
                 ];
             });
 
-            $messageText = 'Here are a few reports I found that may help. Please choose the one you would like more information on.';
+            $messageText = 'Here are a few reports I found that may help. Please click on the title of the report you would like to interact with.';
 
             $this->_storeConversationChunk($messageText, 'assistant');
 
@@ -148,7 +140,9 @@ class ChatBot extends Component
             $this->newSubject = false;
 
         } else {
-            $response = json_decode($this->openAiService->generateResponse($this->messages, $this->_generateChunkJson()));
+            // first let's query pinecone again now just for this document
+            $chunkIds = $this->_getDocumentChunksFromVectors($this->currentDocument->report_id);
+            $response = json_decode($this->openAiService->generateResponse($this->messages, $this->_generateChunkJson($chunkIds)));
 
             $this->messages[] = [
                 'role' => 'system',
@@ -197,6 +191,38 @@ class ChatBot extends Component
         $this->dispatch('scroll-to-bottom');
     }
 
+    private function _getDocumentChunksFromVectors($report_id = ''): array
+    {
+        $question = $this->openAiService->embedData([$this->question]);
+
+        if (!empty($report_id)) {
+            $relevantChunks = $this->pinecone->data()
+                ->vectors()
+                ->query(vector: $question[0]->embedding, namespace: 'crsbot', filter: ['report_id' => ['$eq' => $report_id]], topK: 10)
+                ->json();
+
+            return Arr::map($relevantChunks['matches'], function (array $docChunk, string $key) {
+                return [
+                    'chunk_id' => $docChunk['id']
+                ];
+            });
+        } else {
+            $relevantDocs = $this->pinecone->data()
+                ->vectors()
+                ->query(vector: $question[0]->embedding, namespace: 'crsbot', topK: 10)
+                ->json();
+
+            // let's reduce down to just the unique document ID's
+            $documentChunks = Arr::map($relevantDocs['matches'], function (array $docChunk, string $key) {
+                return [
+                    'report_id' => Arr::first(explode('_', $docChunk['id']))
+                ];
+            });
+
+            return array_unique_multidimensional($documentChunks);
+        }
+    }
+
     private function _storeConversationChunk($message, $role): void {
         $this->conversation->messages()->create([
             'content' => $message,
@@ -211,14 +237,21 @@ class ChatBot extends Component
         ]);
     }
 
-    private function _generateChunkJson() {
-        return $this->currentDocument->chunks->map(function ($chunk) {
+    private function _generateChunkJson($filterChunkIds = null) {
+        $chunkIdList = $filterChunkIds ? array_column($filterChunkIds, 'chunk_id') : [];
+
+        return $this->currentDocument->chunks->when(!empty($chunkIdList), function ($collection) use ($chunkIdList) {
+            return $collection->filter(function ($chunk) use ($chunkIdList) {
+                return in_array($chunk->chunk_id, $chunkIdList);
+            });
+        })->map(function ($chunk) {
             return [
                 'text' => $chunk->text,
                 'page_number' => $chunk->page_number,
             ];
         })->toJson();
     }
+
 
     private function _startNewSession(): string
     {
