@@ -32,13 +32,15 @@
                 @foreach($messages as $message)
                     @if ($message['role'] === 'user')
                         <div class="flex justify-end">
-                            <div class="max-w-xs bg-blue-100 rounded p-2">
-                                <p>{{ $message['content'] }}</p>
+                            <div class="max-w-xs bg-blue-100 rounded p-0">
+                                {!! nl2p($message['content']) !!}
                             </div>
                         </div>
                     @else
-                        <div class="p-2 my-2 bg-gray-100 rounded">
-                            <p>{{ $message['content'] }}</p>
+                        <div class="flex justify-start">
+                            <div class="p-0 my-2 bg-gray-100 rounded">
+                                {!! nl2p($message['content']) !!}
+                            </div>
                         </div>
                     @endif
                 @endforeach
