@@ -643,6 +643,8 @@ class ComposerStaticInit968f73bcf5520ee401d641d0d79555ec
         'App\\Actions\\EmbedPdf' => __DIR__ . '/../..' . '/app/Actions/EmbedPdf.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
         'App\\Livewire\\ChatBot' => __DIR__ . '/../..' . '/app/Livewire/ChatBot.php',
+        'App\\Livewire\\ChatInput' => __DIR__ . '/../..' . '/app/Livewire/ChatInput.php',
+        'App\\Livewire\\ChatMessageList' => __DIR__ . '/../..' . '/app/Livewire/ChatMessageList.php',
         'App\\Models\\Conversation' => __DIR__ . '/../..' . '/app/Models/Conversation.php',
         'App\\Models\\ConversationChunk' => __DIR__ . '/../..' . '/app/Models/ConversationChunk.php',
         'App\\Models\\ConversationDocument' => __DIR__ . '/../..' . '/app/Models/ConversationDocument.php',

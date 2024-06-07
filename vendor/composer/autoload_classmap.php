@@ -9,6 +9,8 @@ return array(
     'App\\Actions\\EmbedPdf' => $baseDir . '/app/Actions/EmbedPdf.php',
     'App\\Http\\Controllers\\Controller' => $baseDir . '/app/Http/Controllers/Controller.php',
     'App\\Livewire\\ChatBot' => $baseDir . '/app/Livewire/ChatBot.php',
+    'App\\Livewire\\ChatInput' => $baseDir . '/app/Livewire/ChatInput.php',
+    'App\\Livewire\\ChatMessageList' => $baseDir . '/app/Livewire/ChatMessageList.php',
     'App\\Models\\Conversation' => $baseDir . '/app/Models/Conversation.php',
     'App\\Models\\ConversationChunk' => $baseDir . '/app/Models/ConversationChunk.php',
     'App\\Models\\ConversationDocument' => $baseDir . '/app/Models/ConversationDocument.php',

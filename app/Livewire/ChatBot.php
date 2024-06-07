@@ -6,6 +6,7 @@ use Arr;
 use Livewire\Component;
 use App\Models\Message;
 use App\Models\Document;
+use Livewire\Attributes\On;
 use Illuminate\Support\Str;
 use App\Models\Conversation;
 use Livewire\Attributes\Title;
@@ -23,9 +24,21 @@ class ChatBot extends Component
     public $prompt = '';
     public $question = '';
     public $documents = [];
+    public $showSlideOut = false;
     public $activeDocumentId;
     private GeneratorOpenAIService $openAiService;
     private Pinecone $pinecone;
+
+    public function mount(): void
+    {
+        if ($this->conversation->messages->isEmpty()) {
+            $this->messages[] = [
+                'role' => 'bot',
+                'content' => 'Hi there! I am your CRS data bot. I can help you find information by searching thousands of reports. What can I help you find?',
+                'initial' => true
+            ];
+        }
+    }
 
     public function boot(GeneratorOpenAIService $openAIService): void
     {
@@ -39,7 +52,7 @@ class ChatBot extends Component
         }
 
         $this->conversation = Conversation::with([
-            'documents.document.chunks', // Eager load chunks to avoid N+1 problem
+            'documents.document.chunks',
             'messages'
         ])->firstOrCreate([
             'session_id' => $sessionId
@@ -62,16 +75,27 @@ class ChatBot extends Component
                     'pages' => $currentDocument->chunks->count(),
                 ];
             });
+
+            $this->messages = $this->conversation->messages->map(function (Message $message) {
+                return [
+                    'content' => $message->content,
+                    'role' => $message->role
+                ];
+            })->toArray();
         }
 
-        $this->messages = $this->conversation->messages->map(function (Message $message) {
-            return [
-                'content' => $message->content,
-                'role' => $message->role
-            ];
-        })->toArray();
-
         $this->dispatch('scroll-to-bottom');
+    }
+
+    #[On('info-clicked')]
+    public function slideOut()
+    {
+        $this->showSlideOut = true;
+    }
+
+    public function slideIn()
+    {
+        $this->showSlideOut = false;
     }
 
     public function submitPrompt(): void
@@ -82,7 +106,7 @@ class ChatBot extends Component
             $this->reset('messages');
             $this->messages[] = [
                 'role' => 'bot',
-                'content' => 'Ok. What can I help you find next?'
+                'content' => 'Ok. What can I help you find next?',
             ];
             $this->documents = [];
             $this->dispatch('scroll-to-bottom');
@@ -146,7 +170,6 @@ class ChatBot extends Component
 
         $this->dispatch('scroll-to-bottom');
     }
-
 
     public function selectDocument($id): void
     {

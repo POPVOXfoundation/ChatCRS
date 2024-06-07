@@ -11,7 +11,7 @@ function nl2p($text) {
 
     foreach (explode("\n", $text) as $line) {
         if (trim($line)) {
-            $paragraphs .= '<p class="m-3">' . htmlspecialchars($line) . '</p>';
+            $paragraphs .= '<p>' . htmlspecialchars($line) . '</p>';
         }
     }
 
