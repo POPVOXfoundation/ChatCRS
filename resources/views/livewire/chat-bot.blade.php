@@ -56,7 +56,7 @@
                                 @foreach($messages as $message)
                                     @if ($message['role'] === 'user')
                                         <div class="flex items-end gap-2">
-                                            <div class="ml-auto flex max-w-[70%] flex-col gap-2 rounded-l-xl rounded-tr-xl bg-indigo-700 p-4 text-sm text-slate-100 md:max-w-[60%] dark:bg-blue-600 dark:text-slate-100">
+                                            <div class="ml-auto flex max-w-[70%] flex-col gap-2 rounded-l-xl rounded-tr-xl bg-pvox-link-dark p-4 text-sm text-slate-100 md:max-w-[60%] dark:bg-blue-600 dark:text-slate-100">
                                                 <div class="text-sm flex flex-col space-y-3">
                                                     {!! nl2p($message['content']) !!}
                                                 </div>
@@ -93,9 +93,9 @@
                         <!-- Input field -->
                         <div class="p-6">
                             <form class="flex w-full" wire:submit.prevent="submitPrompt">
-                                <input wire:model="prompt" type="text" class="w-full min-w-0 appearance-none rounded-md border-0 bg-white px-3 py-1.5 text-base text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:w-64 sm:text-sm sm:leading-6 xl:w-full" placeholder="Type your message here..." autofocus>
+                                <input wire:model="prompt" type="text" class="w-full min-w-0 appearance-none rounded-md border-0 bg-white px-3 py-1.5 text-base text-gray-900 shadow-sm ring-1 ring-inset ring-pvox-link-dark placeholder:text-gray-400 focus:ring-1 focus:ring-inset focus:ring-pvox-link-dark sm:w-64 sm:text-sm sm:leading-6 xl:w-full" placeholder="Type your message here..." autofocus>
                                 <div class="mt-4 sm:ml-4 sm:mt-0 sm:flex-shrink-0">
-                                    <button type="submit" class="flex w-full items-center justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Send</button>
+                                    <button type="submit" class="flex w-full items-center justify-center rounded-md bg-pvox-link-dark px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Send</button>
                                 </div>
                             </form>
                         </div>

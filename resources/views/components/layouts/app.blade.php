@@ -9,14 +9,14 @@
 </head>
 <body class="bg-gray-200 h-full">
 <div class="flex flex-col h-full">
-    <header class="shrink-0 bg-gray-900">
+    <header class="shrink-0 bg-pvox-dark">
         <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
             <div class="flex items-center">
-                <svg class="h-8 w-8 text-indigo-500 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <svg class="h-8 w-8 text-pvox-orange mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h6m5 8h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2h2l4 4z" />
                 </svg>
                 <span class="text-2xl font-bold text-white">Chat</span>
-                <span class="text-2xl font-bold text-indigo-500">CRS</span>
+                <span class="text-2xl font-bold text-pvox-orange">CRS</span>
             </div>
             <div class="flex items-center gap-x-8">
                 <button id="info-show" type="button" class="-m-2.5 p-2.5 text-gray-400 hover:text-gray-300">

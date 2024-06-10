@@ -19,6 +19,11 @@ export default {
             fontFamily: {
                 sans: ['Inter var', ...defaultTheme.fontFamily.sans],
             },
+            colors: {
+                'pvox-orange': '#FF7F50',
+                'pvox-dark': '#2d3748',
+                'pvox-link-dark': '#2d3748',
+            }
         },
     },
     plugins: [],
