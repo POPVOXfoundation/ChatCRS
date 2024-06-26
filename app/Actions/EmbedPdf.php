@@ -100,7 +100,6 @@ class EmbedPdf
             $pinecone = new Pinecone(env('PINECONE_API_KEY'), env('PINECONE_INDEX_HOST'));
 
 //            $pinecone->data()->vectors()->delete(namespace: 'crsbot', deleteAll: true);
-//            dd('deleted');
 
             collect($embeddings)->chunk(20)->each(function (Collection $chunk, $chunkIndex) use ($pinecone, $sanitizedPages, $report, $json) {
                 $pinecone->data()->vectors()->upsert(

@@ -8,8 +8,12 @@
                 <div class="border-b border-gray-200 px-4 py-6 sm:px-6 lg:pl-8 xl:w-1/3 xl:shrink-0 xl:border-b-0 xl:border-r xl:pl-6 h-full flex flex-col">
                     <!-- Document list section -->
                     <div class="flex-1 overflow-y-auto divide-y divide-gray-200 rounded-lg bg-white shadow">
-                        <div class="px-4 py-5 sm:px-6">
+                        <div class="flex justify-between items-center px-4 py-5 sm:px-6">
                             <h2 class="text-lg font-medium leading-6 text-gray-900">Relevant CRS Reports</h2>
+                            @if (!empty($documents))
+                            <button wire:click="startNewSearch" type="button" class="rounded bg-red-600 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600">New Search
+                            </button>
+                            @endif
                         </div>
                         <div class="px-4 py-2 sm:p-2">
                             <ul role="list" class="divide-y divide-gray-100">

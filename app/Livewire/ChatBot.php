@@ -98,18 +98,15 @@ class ChatBot extends Component
         $this->showSlideOut = false;
     }
 
+    public function startNewSearch(): void
+    {
+        $this->_resetSearch();
+    }
+
     public function submitPrompt(): void
     {
         if (Str::contains($this->prompt, ['new search', 'new subject'])) {
-            $this->_startNewSession();
-            $this->prompt = '';
-            $this->reset('messages');
-            $this->messages[] = [
-                'role' => 'bot',
-                'content' => 'Ok. What can I help you find next?',
-            ];
-            $this->documents = [];
-            $this->dispatch('scroll-to-bottom');
+            $this->_resetSearch();
             return;
         }
 
@@ -277,5 +274,18 @@ class ChatBot extends Component
         session()->put('crschat', $sessionId);
 
         return $sessionId;
+    }
+
+    private function _resetSearch(): void
+    {
+        $this->_startNewSession();
+        $this->prompt = '';
+        $this->reset('messages');
+        $this->messages[] = [
+            'role' => 'bot',
+            'content' => 'Ok. What can I help you find next?',
+        ];
+        $this->documents = [];
+        $this->dispatch('scroll-to-bottom');
     }
 }
