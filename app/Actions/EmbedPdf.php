@@ -138,7 +138,7 @@ class EmbedPdf
     private function removeFootnotesSection($text): string
     {
         // Attempt to find the start of the footnotes section by looking for a number followed by text,
-        // which should be at the end of the text or followed by a very distinct separator (like a double newline).
+        // which should be at the end of the text or followed by a very distinct separator (like a double newline)
         $pattern = '/\n(\d+ [^\n]+)(\n\n|$)/';
 
         while (preg_match($pattern, $text, $matches, PREG_OFFSET_CAPTURE)) {

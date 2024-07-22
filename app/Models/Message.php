@@ -11,6 +11,8 @@ class Message extends Model
 
     protected $fillable = [
         'content',
-        'role'
+        'role',
+        'feedback_type',
+        'feedback_text',
     ];
 }

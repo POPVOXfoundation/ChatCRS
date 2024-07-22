@@ -26,11 +26,18 @@ class ChatBot extends Component
     public $documents = [];
     public $showSlideOut = false;
     public $activeDocumentId;
+    public $isFeedbackSubmission = false;
     private GeneratorOpenAIService $openAiService;
     private Pinecone $pinecone;
 
     public function mount(): void
     {
+        if (session()->exists('isFeedbackSubmission')) {
+            $this->isFeedbackSubmission = session('isFeedbackSubmission');
+        } else {
+            $this->isFeedbackSubmission = false;
+        }
+
         if ($this->conversation->messages->isEmpty()) {
             $this->messages[] = [
                 'role' => 'bot',
@@ -78,13 +85,20 @@ class ChatBot extends Component
 
             $this->messages = $this->conversation->messages->map(function (Message $message) {
                 return [
+                    'id' => $message->id,
+                    'feedback_type' => $message->feedback_type,
+                    'feedback_text' => $message->feedback_text,
                     'content' => $message->content,
                     'role' => $message->role
                 ];
             })->toArray();
         }
 
-        $this->dispatch('scroll-to-bottom');
+        if (!$this->isFeedbackSubmission) {
+            $this->dispatch('scroll-to-bottom');
+        } else {
+            session()->put('isFeedbackSubmission', false);
+        }
     }
 
     #[On('info-clicked')]
@@ -112,9 +126,12 @@ class ChatBot extends Component
 
         $this->question = $this->prompt;
 
-        $this->_storeConversationChunk($this->prompt, 'user');
+        $newConvoChunk = $this->_storeConversationChunk($this->prompt, 'user');
 
         $this->messages[] = [
+            'id' => $newConvoChunk->id,
+            'feedback_type' => $newConvoChunk->feedback_type,
+            'feedback_text' => $newConvoChunk->feedback_text,
             'role' => 'user',
             'content' => $this->prompt
         ];
@@ -145,9 +162,12 @@ class ChatBot extends Component
 
             $messageText = 'Here are a few reports I found that may help. Please click on the title of the report you would like to interact with.';
 
-            $this->_storeConversationChunk($messageText, 'assistant');
+            $newConvoChunk = $this->_storeConversationChunk($messageText, 'assistant');
 
             $this->messages[] = [
+                'id' => $newConvoChunk->id,
+                'feedback_type' => $newConvoChunk->feedback_type,
+                'feedback_text' => $newConvoChunk->feedback_text,
                 'role' => 'assistant',
                 'content' => $messageText
             ];
@@ -157,12 +177,15 @@ class ChatBot extends Component
             $chunkIds = $this->_getDocumentChunksFromVectors($this->currentDocument->report_id);
             $response = json_decode($this->openAiService->generateResponse($this->messages, $this->_generateChunkJson($chunkIds)));
 
+            $newConvoChunk = $this->_storeConversationChunk($response->answer, 'assistant');
+
             $this->messages[] = [
-                'role' => 'system',
+                'id' => $newConvoChunk->id,
+                'feedback_type' => $newConvoChunk->feedback_type,
+                'feedback_text' => $newConvoChunk->feedback_text,
+                'role' => 'assistant',
                 'content' => $response->answer
             ];
-
-            $this->_storeConversationChunk($response->answer, 'assistant');
         }
 
         $this->dispatch('scroll-to-bottom');
@@ -175,15 +198,21 @@ class ChatBot extends Component
 
         $messageText = 'Ok. How can I help you with this report?';
 
-        $this->_storeConversationChunk($document->title, 'user');
-        $this->_storeConversationChunk($messageText, 'assistant');
+        $newUserConvoChunk = $this->_storeConversationChunk($document->title, 'user');
+        $newAssistConvoChunk = $this->_storeConversationChunk($messageText, 'assistant');
 
         $this->messages[] = [
+            'id' => $newUserConvoChunk->id,
+            'feedback_type' => $newUserConvoChunk->feedback_type,
+            'feedback_text' => $newUserConvoChunk->feedback_text,
             'role' => 'user',
             'content' => $document->title
         ];
 
         $this->messages[] = [
+            'id' => $newAssistConvoChunk->id,
+            'feedback_type' => $newAssistConvoChunk->feedback_type,
+            'feedback_text' => $newAssistConvoChunk->feedback_text,
             'role' => 'assistant',
             'content' => $messageText
         ];
@@ -200,6 +229,19 @@ class ChatBot extends Component
         $conversationDoc->save();
 
         $this->dispatch('scroll-to-bottom');
+    }
+
+    public function submitFeedback($messageId, $feedbackType, $feedbackText): void
+    {
+        $this->isFeedbackSubmission = true;
+        session()->put('isFeedbackSubmission', true);
+
+        $message = Message::find($messageId);
+        $message->feedback_type = $feedbackType;
+        $message->feedback_text = $feedbackText;
+        $message->save();
+
+        $this->dispatch('feedback-submitted', ['messageId' => $messageId]);
     }
 
     private function _getDocumentChunksFromVectors($report_id = ''): array
@@ -233,9 +275,9 @@ class ChatBot extends Component
         }
     }
 
-    private function _storeConversationChunk($message, $role): void
+    private function _storeConversationChunk($message, $role): Message
     {
-        $this->conversation->messages()->create([
+        return $this->conversation->messages()->create([
             'content' => $message,
             'role' => $role
         ]);

@@ -60,7 +60,7 @@
                                 @foreach($messages as $message)
                                     @if ($message['role'] === 'user')
                                         <div class="flex items-end gap-2">
-                                            <div class="ml-auto flex max-w-[70%] flex-col gap-2 rounded-l-xl rounded-tr-xl bg-pvox-link-dark p-4 text-sm text-slate-100 md:max-w-[60%] dark:bg-blue-600 dark:text-slate-100">
+                                            <div class="ml-auto flex w-[70%] flex-col gap-2 rounded-l-xl rounded-tr-xl bg-pvox-link-dark p-4 text-sm text-slate-100 md:w-[60%] dark:bg-blue-600 dark:text-slate-100">
                                                 <div class="text-sm flex flex-col space-y-3">
                                                     {!! nl2p($message['content']) !!}
                                                 </div>
@@ -70,11 +70,67 @@
                                     @else
                                         <div class="flex items-end gap-2">
                                             <img class="size-8 rounded-full object-cover" src="{{ asset('images/bot.webp') }}" alt="avatar" />
-                                            <div class="mr-auto flex max-w-[70%] flex-col gap-2 rounded-r-xl rounded-tl-xl bg-slate-100 px-4 py-3 text-slate-700 md:max-w-[60%] dark:bg-slate-800 dark:text-slate-300">
+                                            <div class="mr-auto flex w-[70%] flex-col gap-2 rounded-r-xl rounded-tl-xl bg-slate-100 px-4 py-3 text-slate-700 md:w-[60%] dark:bg-slate-800 dark:text-slate-300">
                                                 <span class="font-semibold text-black dark:text-white">CRSbot</span>
                                                 <div class="text-sm flex flex-col space-y-3">
                                                     {!! nl2p($message['content']) !!}
                                                 </div>
+                                                @if ($message['role'] === 'assistant' && empty($message['feedback_type']))
+                                                    <div x-data="{ showCommentBox: false, feedbackType: null, feedbackText: '', selected: null, feedbackSubmitted: false, isLoading: false }" class="flex flex-col space-y-2 mt-2" x-init="
+    $wire.on('feedback-submitted', (event) => {
+        if (event.messageId == {{ $message['id'] }}) {
+            feedbackSubmitted = true;
+            showCommentBox = false;
+        }
+    });
+">
+                                                        <div class="flex justify-end space-x-1">
+                                                            <button
+                                                                x-on:click="showCommentBox = true; feedbackType = 1; selected = 1"
+                                                                x-bind:class="{'bg-green-100 text-green-600': selected === 1}"
+                                                                class="rounded-full p-1.5 text-slate-700/75 hover:bg-slate-900/10 hover:text-slate-700 focus:outline-none focus-visible:text-slate-700 focus-visible:outline focus-visible:outline-offset-0 focus-visible:outline-blue-700 active:bg-slate-900/5 active:-outline-offset-2 dark:text-slate-300/75 dark:hover:bg-white/10 dark:hover:text-slate-300 dark:focus-visible:text-slate-300 dark:focus-visible:outline-blue-600 dark:active:bg-white/5"
+                                                                title="Useful"
+                                                                aria-label="Useful"
+                                                                x-bind:disabled="selected !== null && selected !== 1"
+                                                            >
+                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
+                                                                    <path d="M2.09 15a1 1 0 0 0 1-1V8a1 1 0 1 0-2 0v6a1 1 0 0 0 1 1ZM5.765 13H4.09V8c.663 0 1.218-.466 1.556-1.037a4.02 4.02 0 0 1 1.358-1.377c.478-.292.907-.706.989-1.26V4.32a9.03 9.03 0 0 0 0-2.642c-.028-.194.048-.394.224-.479A2 2 0 0 1 11.09 3c0 .812-.08 1.605-.235 2.371a.521.521 0 0 0 .502.629h1.733c1.104 0 2.01.898 1.901 1.997a19.831 19.831 0 0 1-1.081 4.788c-.27.747-.998 1.215-1.793 1.215H9.414c-.215 0-.428-.035-.632-.103l-2.384-.794A2.002 2.002 0 0 0 5.765 13Z" />
+                                                                </svg>
+                                                            </button>
+                                                            <button
+                                                                x-on:click="showCommentBox = true; feedbackType = 0; selected = 0"
+                                                                x-bind:class="{'bg-red-100 text-red-600': selected === 0}"
+                                                                class="rounded-full p-1.5 text-slate-700/75 hover:bg-slate-900/10 hover:text-slate-700 focus:outline-none focus-visible:text-slate-700 focus-visible:outline focus-visible:outline-offset-0 focus-visible:outline-blue-700 active:bg-slate-900/5 active:-outline-offset-2 dark:text-slate-300/75 dark:hover:bg-white/10 dark:hover:text-slate-300 dark:focus-visible:text-slate-300 dark:focus-visible:outline-blue-600 dark:active:bg-white/5"
+                                                                title="Not Useful"
+                                                                aria-label="Not Useful"
+                                                                x-bind:disabled="selected !== null && selected !== 0"
+                                                            >
+                                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
+                                                                    <path d="M10.325 3H12v5c-.663 0-1.219.466-1.557 1.037a4.02 4.02 0 0 1-1.357 1.377c-.478.292-.907.706-.989 1.26v.005a9.031 9.031 0 0 0 0 2.642c.028.194-.048.394-.224.479A2 2 0 0 1 5 13c0-.812.08-1.605.234-2.371a.521.521 0 0 0-.5-.629H3C1.896 10 .99 9.102 1.1 8.003A19.827 19.827 0 0 1 2.18 3.215C2.45 2.469 3.178 2 3.973 2h2.703a2 2 0 0 1 .632.103l2.384.794a2 2 0 0 0 .633.103ZM14 2a1 1 0 0 0-1 1v6a1 1 0 1 0 2 0V3a1 1 0 0 0-1-1Z" />
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                        <div x-show="showCommentBox && !feedbackSubmitted" class="flex flex-col space-y-2 mt-2 text-sm">
+                                                            <label for="feedback_text_{{ $message['id'] }}" class="sr-only">Feedback Text</label>
+                                                            <textarea x-model="feedbackText" id="feedback_text_{{ $message['id'] }}" rows="2" class="p-2 border rounded text-sm" placeholder="Add a comment..."></textarea>
+                                                            <div class="flex justify-end">
+                                                                <button
+                                                                    x-on:click="isLoading = true; $wire.submitFeedback({{ $message['id'] }}, feedbackType, feedbackText).then(() => { isLoading = false; feedbackSubmitted = true; showCommentBox = false; })"
+                                                                    x-bind:disabled="isLoading"
+                                                                    class="px-2 py-1 text-xs text-white bg-blue-500 rounded flex items-center"
+                                                                >
+                                                                    <svg x-show="isLoading" class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C6.477 0 2 4.477 2 10s4.477 10 10 10v-4a8 8 0 01-8-8z"></path>
+                                                                    </svg>
+                                                                    <span x-show="!isLoading">Submit</span>
+                                                                    <span x-show="isLoading">Sending</span>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <div x-show="feedbackSubmitted" class="mt-2 text-green-600 text-sm">Thank you for your feedback!</div>
+                                                    </div>
+                                                @endif
                                             </div>
                                         </div>
                                     @endif
@@ -113,6 +169,7 @@
 @script
 <script>
     $wire.on('scroll-to-bottom', () => {
+        console.log('I am doing the scroll to bottom thing');
         const container = document.getElementById('message-container');
         setTimeout(() => {
             container.scrollTop = container.scrollHeight;
