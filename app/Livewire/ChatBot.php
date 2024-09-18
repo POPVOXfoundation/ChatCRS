@@ -173,6 +173,13 @@ class ChatBot extends Component
             ];
 
             $this->newSubject = false;
+        } elseif (empty($this->currentDocument)) {
+            $this->messages[] = [
+                'role' => 'bot',
+                'content' => 'Please click on a document title from the list on the left to continue. If you would rather start a new search just type "new subject" or "new search".',
+            ];
+            $this->dispatch('scroll-to-bottom');
+            return;
         } else {
             $chunkIds = $this->_getDocumentChunksFromVectors($this->currentDocument->report_id);
             $response = json_decode($this->openAiService->generateResponse($this->messages, $this->_generateChunkJson($chunkIds)));

@@ -66,7 +66,7 @@
                                     </div>
                                     <div>
                                         <dt class="text-sm font-semibold leading-7 text-gray-900">How do I change the report I am engaging with?</dt>
-                                        <dd class="mt-2 text-sm leading-7 text-gray-600">Just type "new subject" or "new topic'</dd>
+                                        <dd class="mt-2 text-sm leading-7 text-gray-600">Just type "new subject" or "new search'</dd>
                                     </div>
                                     <div>
                                         <dt class="text-sm font-semibold leading-7 text-gray-900">How can I read the full CRS report?</dt>

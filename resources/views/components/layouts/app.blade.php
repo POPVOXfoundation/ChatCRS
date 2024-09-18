@@ -37,7 +37,7 @@
         <div class="mx-auto max-w-7xl px-6 pb-8 pt-8 sm:pt-24 lg:px-8 lg:pt-16">
             <div class="xl:grid xl:grid-cols-3 xl:gap-8">
                 <div class="space-y-8">
-                    <img class="h-20" src="{{ asset('images/foundation_logo.png') }}" alt="Company name">
+                    <img class="h-20" src="{{ asset('images/foundation_logo.png') }}" alt="POPVOX Foundation">
                     <p class="text-sm leading-6 text-gray-600">ChatCRS is a project of the nonprofit POPVOX Foundation, with development by POPVOX, Inc.</p>
                     <div class="flex space-x-6">
                         <a href="https://www.instagram.com/popvoxfdn" class="text-gray-400 hover:text-gray-500">
