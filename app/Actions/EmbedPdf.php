@@ -45,7 +45,7 @@ class EmbedPdf
             })
             ->each(function ($report) use ($command) {
             // for testing
-//            if ($report['number'] !== 'R42926') {
+//            if ($report['number'] !== 'R43739') {
 //                return;
 //            }
             //////////////
@@ -127,6 +127,7 @@ class EmbedPdf
             });
 
             $command->newline(2);
+            sleep(2);
         });
     }
 

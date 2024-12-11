@@ -25,7 +25,6 @@ class GeneratorOpenAIService
             )
         ];
 
-
         foreach ($questions as $question) {
             $systemPrompt[] = [
                 'role' => $question['role'],
