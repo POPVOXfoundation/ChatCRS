@@ -73,6 +73,18 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
+        },
+        "audit": {
+            "ignore": {
+                "PKSA-mdq4-51ck-6kdq": "Laravel CRLF email rule fix requires Laravel 12; tracked for separate major upgrade",
+                "PKSA-8qx3-n5y5-vvnd": "Laravel framework advisory; fix requires Laravel 12 upgrade",
+                "PKSA-q46n-4fdk-zjr4": "Laravel framework advisory; fix requires Laravel 12 upgrade",
+                "PKSA-qzrn-rnz3-85w1": "Laravel framework advisory; fix requires Laravel 12 upgrade",
+                "PKSA-w7xr-vk7n-rstm": "Laravel framework advisory; fix requires Laravel 12 upgrade",
+                "PKSA-xnj5-w74d-6wmz": "Saloon fix requires v4; blocked by probots-io/pinecone-php pinning saloon ^3.6",
+                "PKSA-rnpm-45mg-w6ht": "Saloon fix requires v4; blocked by probots-io/pinecone-php pinning saloon ^3.6",
+                "PKSA-5szq-gvrg-ttfq": "Saloon fix requires v4; blocked by probots-io/pinecone-php pinning saloon ^3.6"
+            }
         }
     },
     "minimum-stability": "stable",
