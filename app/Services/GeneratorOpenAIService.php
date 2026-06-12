@@ -50,7 +50,7 @@ class GeneratorOpenAIService
         return $response['choices'][0]['message']['content'];
     }
 
-    public function embedData($data)
+    public function embedData($data): array
     {
         return $this->client->embeddings()->create([
             'model' => 'text-embedding-ada-002',

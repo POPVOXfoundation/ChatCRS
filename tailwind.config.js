@@ -14,15 +14,15 @@ export default {
         'mb-0', 'mb-1', 'mb-2', 'mb-3', 'mb-4', 'mb-5', 'mb-6', 'mb-7', 'mb-8', 'mb-9', 'mb-10',
     ],
     theme: {
+        colors: {
+            'pvox-orange': '#FF7F50',
+            'pvox-dark': '#2d3748',
+            'pvox-link-dark': '#2d3748',
+        },
         extend: {
             fontFamily: {
                 sans: ['Inter var', ...defaultTheme.fontFamily.sans],
             },
-            colors: {
-                'pvox-orange': '#FF7F50',
-                'pvox-dark': '#2d3748',
-                'pvox-link-dark': '#2d3748',
-            }
         },
     },
     plugins: [],
