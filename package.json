@@ -5,12 +5,27 @@
         "dev": "vite",
         "build": "vite build"
     },
+    "overrides": {
+        "brace-expansion": "2.1.0",
+        "cross-spawn": "7.0.6",
+        "glob": "10.5.0",
+        "minimatch": "9.0.9",
+        "chokidar": {
+            "picomatch": "2.3.2"
+        },
+        "micromatch": {
+            "picomatch": "2.3.2"
+        },
+        "vite-plugin-full-reload": {
+            "picomatch": "2.3.2"
+        }
+    },
     "devDependencies": {
-        "autoprefixer": "^10.4.19",
-        "axios": "^1.6.4",
-        "laravel-vite-plugin": "^1.0",
-        "postcss": "^8.4.38",
-        "tailwindcss": "^3.4.1",
-        "vite": "^5.0"
+        "autoprefixer": "^10.4.27",
+        "axios": "^1.15.0",
+        "laravel-vite-plugin": "^3.0.1",
+        "postcss": "^8.5.9",
+        "tailwindcss": "^3.4.19",
+        "vite": "^8.0.8"
     }
 }
